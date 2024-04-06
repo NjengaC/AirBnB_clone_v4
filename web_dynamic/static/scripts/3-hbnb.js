@@ -25,9 +25,9 @@ $(document).ready(function () {
   $.ajax({
     type: 'POST',
     url: 'http://0.0.0.0:5001/api/v1/places_search',
-    data: '{}',
-    dataType: 'json',
     contentType: 'application/json',
+    data: JSON.stringify({}),
+    dataType: 'json',
     success: function (data) {
       for (let i = 0; i < data.length; i++) {
         let place = data[i];

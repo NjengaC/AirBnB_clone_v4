@@ -13,13 +13,17 @@ $(document).ready(function () {
       $('div.amenities > h4').html('&nbsp;');
     }
   });
-  $.get('http://0.0.0.0:5001/api/v1/status/', function (data, textStatus) {
-    if (textStatus === 'success') {
+
+  // AJAX request to check API status
+  $.get('http://0.0.0.0:5001/api/v1/status/')
+    .done(function(data) {
       if (data.status === 'OK') {
         $('#api_status').addClass('available');
       } else {
-        $('#api_status').removeClass('available');
+        $('#api_status').addClass('available1');
       }
-    }
-  });
+    })
+    .fail(function(jqXHR, textStatus, errorThrown) {
+      console.error('Error:', textStatus, errorThrown);
+    });
 });
