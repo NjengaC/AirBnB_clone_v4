@@ -1,50 +1,72 @@
-$(document).ready(function () {
-  let checkedAmenities = {};
+$(document).ready(function() {
+  var maxDisplayedAmenities = 3;
+  // Listen for changes on each input checkbox tag
+  $('input[type="checkbox"]').change(function() {
+    var selectedAmenities = [];
 
-  // Handle checkbox change event
-  $(document).on('change', "input[type='checkbox']", function () {
-    if (this.checked) {
-      checkedAmenities[$(this).data('id')] = $(this).data('name');
+    // Loop through each checked checkbox and store Amenity ID in the array
+    $('input[type="checkbox"]:checked').each(function() {
+      selectedAmenities.push($(this).data('name'));
+    });
+    var displayAmenities = selectedAmenities.slice(0, maxDisplayedAmenities);
+    var overflowCount = selectedAmenities.length - maxDisplayedAmenities;
+
+    // Update the h4 tag inside the Amenities section with the list of Amenities checked
+    if (overflowCount > 0) {
+      $('.amenities h4').text(displayAmenities.join(', ') + ' ... (+' + overflowCount + ' more)');
     } else {
-      delete checkedAmenities[$(this).data('id')];
+      $('.amenities h4').text(displayAmenities.join(', '));
     }
-    updateAmenitiesText();
-  });
 
-  // Handle button click event
-  $('#filter-btn').click(function () {
-    // Make a POST request to places_search with checked amenities
+  });
+  $.get('http://127.0.0.1:5001/api/v1/status/', function (data) {
+    if (data.status === 'OK') {
+      $('#api_status').addClass('available');
+    } else {
+      $('#api_status').removeClass('available');
+    }
+  });
+  $.ajax({
+    type: 'POST',
+    url: 'http://127.0.0.1:5001/api/v1/places_search',
+    data: '{}',
+    dataType: 'json',
+    contentType: 'application/json',
+    success: function (data) {
+      for (let i = 0; i < data.length; i++) {
+        let place = data[i];
+        $('.places ').append('<article><h2>' + place.name + '</h2><div class="price_by_night">$' + place.price_by_night + '</div><div class="information"><div class="max_guest"><div class="guest_image"></div><p>' + place.max_guest + '</p></div><div class="number_rooms"><div class="bed_image"></div><p>' + place.number_rooms + '</p></div><div class="number_bathrooms"><div class="bath_image"></div><p>' + place.number_bathrooms + '</p></div></div><div class="description"><p>' + place.description + '</p></div></article>');
+      }
+    }
+  });
+  $('button').click(function() {
+    var selectedAmenities = [];
+
+    // Loop through each checked checkbox and store Amenity ID in the array
+    $('input[type="checkbox"]:checked').each(function() {
+      selectedAmenities.push($(this).data('id'));
+    });
+
+    // Make a POST request to places_search with the list of checked amenities
     $.ajax({
       type: 'POST',
-      url: 'http://127.0.0.1:5001/api/v1/search_places/',
-      contentType: 'application/json',
-      data: JSON.stringify({ amenities: Object.keys(checkedAmenities) }),
+      url: 'http://127.0.0.1:5001/api/v1/places_search',
+      data: JSON.stringify({ amenities: selectedAmenities }),
       dataType: 'json',
+      contentType: 'application/json',
       success: function (data) {
-        // Update the places section with filtered places
-        updatePlaces(data);
+        // Clear existing content
+        $('.places').empty();
+
+        // Update the places section with the response data
+      for (let i = 0; i < data.length; i++) {
+        let place = data[i];
+        $('.places ').append('<article><h2>' + place.name + '</h2><div class="price_by_night">$' + place.price_by_night + '</div><div class="information"><div class="max_guest"><div class="guest_image"></div><p>' + place.max_guest + '</p></div><div class="number_rooms"><div class="bed_image"></div><p>' + place.number_rooms + '</p></div><div class="number_bathrooms"><div class="bath_image"></div><p>' + place.number_bathrooms + '</p></div></div><div class="description"><p>' + place.description + '</p></div></article>');
+      }
       },
-      error: function (xhr, status, error) {
-        console.error('Error:', error);
+      error: function(xhr, textStatus, errorThrown) {
+        console.error('Error:', errorThrown); // Log any errors
       }
     });
   });
-
-  // Function to update the displayed amenities text
-  function updateAmenitiesText() {
-    let lst = Object.values(checkedAmenities);
-    if (lst.length > 0) {
-      $('div.amenities > h4').text(lst.join(', '));
-    } else {
-      $('div.amenities > h4').html('&nbsp;');
-    }
-  }
-
-  // Function to update the places section with filtered places
-  function updatePlaces(places) {
-    $('.places').empty();
-    places.forEach(function (place) {
-      $('.places').append('<article><h2>' + place.name + '</h2><p>' + place.description + '</p></article>');
-    });
-  }
 });
