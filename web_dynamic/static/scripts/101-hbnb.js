@@ -84,4 +84,24 @@ $(document).ready(function () {
       }
     });
   });
+
+  $(document).on('click', '.toggle-reviews', function() {
+    var $toggleSpan = $(this);
+    var $reviews = $('.reviews');
+
+    if ($toggleSpan.text() === 'show') {
+      // Fetch and display reviews
+      $.get('http://127.0.0.1:5001/api/v1/reviews', function (data) {
+        $reviews.empty();
+        data.forEach(function(review) {
+          $reviews.append('<p>' + review.text + '</p>');
+        });
+      });
+      $toggleSpan.text('hide');
+    } else {
+      // Hide reviews
+      $reviews.empty();
+      $toggleSpan.text('show');
+    }
+  });
 });
