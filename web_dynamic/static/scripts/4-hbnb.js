@@ -16,7 +16,7 @@ $(document).ready(function () {
     // Make a POST request to places_search with checked amenities
     $.ajax({
       type: 'POST',
-      url: 'http://0.0.0.0:5001/api/v1/places_search',
+      url: 'http://127.0.0.1:5001/api/v1/search_places/',
       contentType: 'application/json',
       data: JSON.stringify({ amenities: Object.keys(checkedAmenities) }),
       dataType: 'json',

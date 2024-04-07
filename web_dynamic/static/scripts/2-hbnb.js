@@ -1,29 +1,29 @@
-$(document).ready(function () {
-  let checkedAmenities = {};
-  $(document).on('change', "input[type='checkbox']", function () {
-    if (this.checked) {
-      checkedAmenities[$(this).data('id')] = $(this).data('name');
-    } else {
-      delete checkedAmenities[$(this).data('id')];
-    }
-    let lst = Object.values(checkedAmenities);
-    if (lst.length > 0) {
-      $('div.amenities > h4').text(Object.values(checkedAmenities).join(', '));
-    } else {
-      $('div.amenities > h4').html('&nbsp;');
-    }
-  });
+$(document).ready(function() {
+	var maxDisplayedAmenities = 3;
+  // Listen for changes on each input checkbox tag
+  $('input[type="checkbox"]').change(function() {
+    var selectedAmenities = [];
 
-  // AJAX request to check API status
-  $.get('http://0.0.0.0:5001/api/v1/status/')
-    .done(function(data) {
-      if (data.status === 'OK') {
-        $('#api_status').addClass('available');
-      } else {
-        $('#api_status').addClass('available1');
-      }
-    })
-    .fail(function(jqXHR, textStatus, errorThrown) {
-      console.error('Error:', textStatus, errorThrown);
+    // Loop through each checked checkbox and store Amenity ID in the array
+    $('input[type="checkbox"]:checked').each(function() {
+      selectedAmenities.push($(this).data('name'));
+    });
+    var displayAmenities = selectedAmenities.slice(0, maxDisplayedAmenities);
+    var overflowCount = selectedAmenities.length - maxDisplayedAmenities;
+
+    // Update the h4 tag inside the Amenities section with the list of Amenities checked
+    if (overflowCount > 0) {
+    $('.amenities h4').text(displayAmenities.join(', ') + ' ... (+' + overflowCount + ' more)');
+    } else {
+    $('.amenities h4').text(displayAmenities.join(', '));
+    }
+
+  });
+    $.get('http://127.0.0.1:5001/api/v1/status/', function (data) {
+        if (data.status === 'OK') {
+            $('#api_status').addClass('available');
+        } else {
+            $('#api_status').removeClass('available');
+        }
     });
 });
